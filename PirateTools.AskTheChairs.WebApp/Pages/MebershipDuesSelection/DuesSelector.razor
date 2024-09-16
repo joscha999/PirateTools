@@ -1,0 +1,101 @@
+﻿@page "/MembershipDuesSelection/Selector"
+@using System.Globalization
+<PageTitle>Mitgliedsbeitragseinstufung</PageTitle>
+
+<h1 class="mb-4 mt-4">Mitgliedsbeitragseinstufung für den SÄA012 beschlossen auf dem BPT2024.1</h1>
+
+<h2>Achtung: Testphase, alle eingaben die jetzt durchgeführt werden werden ignoriert!</h2>
+
+<p>
+    Die folgenden Daten werden benutzt um dich in der Mitgliederdatenbank zu finden und deine E-Mail zu bestätigen.
+    Bitte stelle sicher die E-Mail zu benutzen die du auch bei deinem Mitgliedsantrag angegeben hast.
+    Falls du deine E-Mail oder andere Daten ändern möchtest wende dich bitte an
+    <a href="mailto:mitglieder@piratenpartei.de">mitglieder@piratenpartei.de</a>.<br />
+
+    Dieses Tool kann nur für die Einstufung ab 72,00 € genutzt werden. Der geminderte 12,00 € Beitrag kann weiterhin
+    beantragt werden. Wende dich hierzu bitte an deinen Landesverband.
+</p>
+
+<div>
+    <div class="row mb-4">
+        <div class="col">
+            <label class="form-label">Vorname</label>
+            <input class="form-control" @bind=Model.MemberFirstName maxlength="255" />
+        </div>
+        <div class="col">
+            <label class="form-label">Nachname</label>
+            <input class="form-control" @bind=Model.MemberLastName maxlength="255" />
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <label class="form-label">Mitgliedsnummer</label>
+            <input class="form-control" type="number" min="0" step="1" @bind=Model.MemberId maxlength="255" />
+        </div>
+        <div class="col">
+            <label class="form-label">E-Mail</label>
+            <input class="form-control" type="email" @bind=Model.MemberEMail maxlength="512" />
+        </div>
+    </div>
+</div>
+
+<h3>Option 1: Mitgliedsbeitrag nach Gehalt</h3>
+
+<div class="mb-4 form-check">
+    <input class="form-check-input" type="checkbox" @bind=PaySelected />
+    <label class="form-check-label">Ich möchte den Mitgliedsbeitrag nach Monatsnettogehalt angeben.</label>
+</div>
+
+<div class="mb-4">
+    <label class="form-label">
+        Monatsnettogehalt (Wähle die höchste Stufe die kleiner als dein Gehalt ist und
+        deine familiären Verpflichtungen berücksichtigt)
+    </label>
+
+    <div class="from-group d-flex">
+        <input class="form-range" type="range" min="0" step="500" max="6000"
+        @bind=PaySelection @bind:event="oninput" disabled="@(_manualSelected)" />
+        <span style="min-width: 10em; text-align: right">
+            @PaySelection.ToString("C2", CultureInfo.GetCultureInfo("de-de"))
+            </span>
+    </div>
+
+    <span>
+        Bei deinem Gehalt wird laut Satzung ein Jahresmitgliedsbeitrag von
+        @CalculateDues().ToString("C2", CultureInfo.GetCultureInfo("de-de")) fällig.
+    </span>
+</div>
+
+<h3>Option 2: Freiwiliger, höherer, Mitgliedsbeitrag</h3>
+
+<div class="mb-4 form-check">
+    <input class="form-check-input" type="checkbox" @bind=ManualSelected />
+    <label class="form-check-label">Ich möchte einen freiwilig höheren Mitgliedsbeitrag angeben.</label>
+</div>
+
+<div class="mb-4">
+    <label class="form-label">Jahresmitgliedsbeitrag</label>
+    <div class="input-group">
+        <input class="form-control" type="number" min="72" step="0.01" @bind=ManualSelection disabled="@(_paySelected)" />
+        <span class="input-group-text">€</span>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(SubmitResult)) {
+    <div class="mb-4">
+        @SubmitResult
+    </div>
+}
+
+<div class="mb-4">
+    <span>
+        Nach dem Absenden erhälst du eine E-Mail zur bestätigung deiner angaben.<br />
+        Sobald du sie erhalten hast folge bitte dem Link in der E-Mail.<br />
+        Erst nach der Bestätigung wird deine Einstufung übernommen!
+    </span>
+</div>
+
+<div class="d-flex justify-content-end mb-4">
+    <button class="btn btn-success" disabled="@(!CanSubmit())" @onclick=Submit>Absenden</button>
+</div>

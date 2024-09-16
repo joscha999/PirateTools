@@ -11,7 +11,7 @@ public class SmtpService {
 		_config = config;
 	}
 
-	public void SendMail(string to,  string subject, string body) {
+	public void SendMail(string to,  string subject, string body, bool isHtmlBody = false) {
 		var mm = new MailMessage();
 		using var smtp = new SmtpClient();
 
@@ -19,6 +19,7 @@ public class SmtpService {
 		mm.To.Add(new MailAddress(to));
 		mm.Subject = subject;
 		mm.Body = body;
+		mm.IsBodyHtml = isHtmlBody;
 
 		smtp.Host = _config.SmtpServer;
 		smtp.Port = _config.SmtpPort;

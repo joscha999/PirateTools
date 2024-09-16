@@ -27,14 +27,14 @@ public class AskYourChairsController : ControllerBase {
     }
 
     [HttpPost]
-    public IActionResult CheckToken([FromBody] string token) => Ok(_dbService.CheckToken(token));
+    public IActionResult CheckToken([FromBody] string token) => Ok(_dbService.CheckAskYourChairsToken(token));
 
     [HttpPost]
     public IActionResult AskQuestion([FromBody] AskQuestionRequest questionRequest) {
         if (!ValidateQuestion(questionRequest.Question))
             return BadRequest();
 
-        if (_dbService.CheckToken(questionRequest.Token) <= 0)
+        if (_dbService.CheckAskYourChairsToken(questionRequest.Token) <= 0)
             return Forbid();
 
         _dbService.AddQuestion(questionRequest.Token, questionRequest.Question);

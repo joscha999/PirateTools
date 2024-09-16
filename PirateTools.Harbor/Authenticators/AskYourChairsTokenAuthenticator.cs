@@ -13,7 +13,7 @@ public class AskYourChairsTokenAuthenticator : IAuthenticator {
         if (!request.Headers.TryGetValue("AuthToken", out var token))
             return Task.FromResult(false);
 
-        var usesLeft = _dbService.CheckToken(token.ToString());
+        var usesLeft = _dbService.CheckAskYourChairsToken(token.ToString());
         metadata.Set("AuthTokenUsesLeft", usesLeft);
         metadata.Set("AuthToken", token.ToString());
 

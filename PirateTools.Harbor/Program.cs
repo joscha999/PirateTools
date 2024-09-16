@@ -45,6 +45,9 @@ public static class Program {
         app.MapSimple<CheckToken>("api/AskYourChairs");
         app.MapSimple<RequestToken>("api/AskYourChairs");
 
+        app.MapSimple<Endpoints.MembershipDuesSelector.CheckToken>("api");
+        app.MapSimple<Endpoints.MembershipDuesSelector.AddEntry>("api");
+
         app.Run();
     }
 }

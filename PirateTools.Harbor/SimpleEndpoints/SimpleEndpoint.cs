@@ -10,6 +10,8 @@ public abstract class SimpleEndpoint {
     protected IEndpointRouteBuilder? _app;
     protected IAuthenticator? authenticator;
 
+    protected HttpRequest? Request;
+
     public void Map(string pattern, IEndpointRouteBuilder app) {
         route = pattern;
         _app = app;
@@ -39,6 +41,16 @@ public abstract class SimpleEndpoint {
     protected void AsGet() => _app?.MapGet(route, HandleInternal);
     protected void AsPost() => _app?.MapPost(route, HandleInternal);
 
+    protected string? GetQueryParameter(string name) {
+        if (Request == null)
+            return null;
+
+        if (!Request.Query.TryGetValue(name, out var value))
+            return null;
+
+        return value;
+    }
+
     protected IResult Ok() => TypedResults.Ok();
     protected IResult Ok<T>(T data) => TypedResults.Ok(data);
 
@@ -51,6 +63,7 @@ public abstract class SimpleEndpoint {
 
 public abstract class SimpleEmptyEndpoint : SimpleEndpoint {
     protected sealed override async Task<IResult> HandleInternal(HttpRequest request) {
+        Request = request;
         var metadata = new RequestMetadata();
 
         // Authorization
@@ -67,6 +80,7 @@ public abstract class SimpleEndpoint<TRequest> : SimpleEndpoint {
     private IValidator<TRequest>? validator;
 
     protected sealed override async Task<IResult> HandleInternal(HttpRequest request) {
+        Request = request;
         var metadata = new RequestMetadata();
 
         // Authorization

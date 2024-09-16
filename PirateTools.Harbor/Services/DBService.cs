@@ -1,4 +1,5 @@
 ﻿using PirateTools.Models.AskYourChairs;
+using PirateTools.Models.MembershipDuesSelector;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +11,8 @@ namespace PirateTools.Harbor.Services;
 public class DBService {
     private readonly List<Question> Questions;
     private readonly Dictionary<string, int> Tokens;
+
+    private readonly Dictionary<Guid, MembershipDuesSelection> MembershipDues;
 
     private readonly object LockObject = new();
 
@@ -25,6 +28,15 @@ public class DBService {
         } else {
             Tokens = [];
         }
+
+        if (File.Exists("membership_dues.json")) {
+            var loadedDues = JsonSerializer.Deserialize<List<MembershipDuesSelection>>(
+                File.ReadAllText("membership_dues.json")) ?? [];
+
+            MembershipDues = loadedDues.ToDictionary(md => md.Id, md => md);
+        } else {
+            MembershipDues = [];
+        }
     }
 
     public string GenerateToken() {
@@ -39,7 +51,7 @@ public class DBService {
         return token;
     }
 
-    public int CheckToken(string token) {
+    public int CheckAskYourChairsToken(string token) {
         lock (LockObject) {
             if (!Tokens.TryGetValue(token, out var usagesLeft))
                 return -1;
@@ -72,8 +84,37 @@ public class DBService {
         }
     }
 
+    public Guid AddMembershipDuesEntry(MembershipDuesSelection entry) {
+        entry.Id = Guid.NewGuid();
+        entry.SubmitDate = DateTime.Now;
+
+        lock (LockObject) {
+            MembershipDues[entry.Id] = entry;
+            Save();
+        }
+
+        return entry.Id;
+    }
+
+    public bool CheckDuesSelectionToken(string token) {
+        lock (LockObject) {
+            if (!Guid.TryParse(token, out var id))
+                return false;
+
+            if (!MembershipDues.TryGetValue(id, out var dues))
+                return false;
+
+            dues.EMailVerified = true;
+            dues.ConfirmDate = DateTime.Now;
+
+            Save();
+            return true;
+        }
+    }
+
     private void Save() {
         File.WriteAllText("questions.json", JsonSerializer.Serialize(Questions));
         File.WriteAllText("tokens.json", JsonSerializer.Serialize(Tokens));
+        File.WriteAllText("membership_dues.json", JsonSerializer.Serialize(MembershipDues.Values.ToList()));
     }
 }
