@@ -30,7 +30,7 @@ public class AddEntry : SimpleEndpoint<MembershipDuesSelection> {
                 Damit diese wirksam werden kann musst Du im letzten Schritt noch deine E-Mail bestätigen.<br />
                 Dies geht ganz einfach in dem Du den nachfolgenden Link aufrufst:<br />
 
-                <a href="https://tools.piratenpartei.de/api/DuesSelector/CheckToken?token={id}">E-Mail Bestätigen</a>
+                <a href="https://api.piratenpartei.de/api/DuesSelector/CheckToken?token={id}">E-Mail Bestätigen</a>
                 """, true);
         return Task.FromResult(Ok());
     }
